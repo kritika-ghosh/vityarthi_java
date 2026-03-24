@@ -1,7 +1,5 @@
 import java.awt.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import javax.swing.*;
 
 public class firstproject {
@@ -15,14 +13,13 @@ public class firstproject {
             connection = DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/k1",
                 "root",
-                "keys12345"
+                "your_password_here"
             );
             System.out.println("Connected to database!");
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        // Create frame
         JFrame frame = new JFrame("My App");
         frame.setSize(500, 700);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -45,6 +42,37 @@ public class firstproject {
         JLabel label = new JLabel("WELCOME!!");
         label.setFont(new Font("Times New Roman", Font.BOLD, 20));
         label.setBounds(180, 200, 200, 40);
+
+        // 🧠 REGISTER LOGIC
+        registerButton.addActionListener(e -> {
+            String username = entuser.getText().trim();
+            String password = entpsw.getText().trim();
+
+            int valid = 0;
+
+            if (password.length() >= 8) valid++;
+            if (!password.equals(password.toLowerCase())) valid++;
+            if (password.matches(".*[@#$&_\\-].*")) valid++;
+            if (password.matches(".*\\d.*")) valid++;
+
+            if (valid == 4) {
+                String query = "INSERT INTO users (username, password) VALUES (?, ?)";
+
+                try (PreparedStatement ps = connection.prepareStatement(query)) {
+                    ps.setString(1, username);
+                    ps.setString(2, password);
+                    ps.executeUpdate();
+
+                    JOptionPane.showMessageDialog(null, "User registered successfully!");
+
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "Error registering user.");
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Password does not meet criteria.");
+            }
+        });
 
         panel.add(label);
         panel.add(entuser);
