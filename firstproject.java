@@ -5,6 +5,7 @@ import javax.swing.*;
 public class firstproject {
 
     private static Connection connection;
+    private static String loggedInUsername = null;
 
     public static void main(String[] args) {
 
@@ -20,9 +21,9 @@ public class firstproject {
             e.printStackTrace();
         }
 
-        JFrame frame = new JFrame("My App");
-        frame.setSize(500, 700);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        JFrame loginFrame = new JFrame("Login");
+        loginFrame.setSize(500, 700);
+        loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel(null);
         panel.setBackground(Color.GRAY);
@@ -43,7 +44,7 @@ public class firstproject {
         label.setFont(new Font("Times New Roman", Font.BOLD, 20));
         label.setBounds(180, 200, 200, 40);
 
-        // 🧠 REGISTER LOGIC
+        // 🧠 REGISTER LOGIC (same as before)
         registerButton.addActionListener(e -> {
             String username = entuser.getText().trim();
             String password = entpsw.getText().trim();
@@ -66,11 +67,41 @@ public class firstproject {
                     JOptionPane.showMessageDialog(null, "User registered successfully!");
 
                 } catch (SQLException ex) {
-                    ex.printStackTrace();
                     JOptionPane.showMessageDialog(null, "Error registering user.");
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "Password does not meet criteria.");
+            }
+        });
+
+        // 🔐 LOGIN LOGIC
+        signInButton.addActionListener(e -> {
+            String username = entuser.getText().trim();
+            String password = entpsw.getText().trim();
+
+            String query = "SELECT * FROM users WHERE username=? AND password=?";
+
+            try (PreparedStatement ps = connection.prepareStatement(query)) {
+                ps.setString(1, username);
+                ps.setString(2, password);
+
+                ResultSet rs = ps.executeQuery();
+
+                if (rs.next()) {
+                    loggedInUsername = username;
+
+                    JOptionPane.showMessageDialog(null, "Login successful!");
+
+                    loginFrame.dispose();
+                    openDashboard();
+
+                } else {
+                    JOptionPane.showMessageDialog(null, "Invalid credentials.");
+                }
+
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Login error.");
             }
         });
 
@@ -80,7 +111,21 @@ public class firstproject {
         panel.add(registerButton);
         panel.add(signInButton);
 
-        frame.add(panel);
-        frame.setVisible(true);
+        loginFrame.add(panel);
+        loginFrame.setVisible(true);
+    }
+
+    // 🧱 Basic dashboard (placeholder)
+    private static void openDashboard() {
+        JFrame dash = new JFrame("Dashboard");
+        dash.setSize(600, 400);
+        dash.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        JLabel welcome = new JLabel("Welcome, " + loggedInUsername);
+        welcome.setFont(new Font("Arial", Font.BOLD, 20));
+        welcome.setHorizontalAlignment(SwingConstants.CENTER);
+
+        dash.add(welcome);
+        dash.setVisible(true);
     }
 }
