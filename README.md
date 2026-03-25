@@ -155,6 +155,3 @@ Kritika Ghosh
 ## License
 
 This project is for academic purposes and can be modified or extended freely.
-
-```
-```
